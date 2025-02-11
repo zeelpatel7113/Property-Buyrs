@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import PromoCard from './PromoCard';
+import path from 'path';
+// import { redirect } from 'next/navigation';
+// import { useRouter } from 'next/router';
 
 const Hero = () => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -11,7 +14,7 @@ const Hero = () => {
       subtitle: "THE BEST PLACE TO GAME",
       description: "Save up to 50% on select Gaming PCs. Get 3 months of Xbox Game Pass for $2 USD.",
       image: "https://images.unsplash.com/photo-1587831990711-23ca6441447b?auto=format&fit=crop&w=800",
-      price: "$999"
+      // price: "$999"
     },
     // Add more slides as needed
   ];
@@ -20,17 +23,20 @@ const Hero = () => {
     {
       label: "SUMMER SALES",
       title: "New RTX 4090",
-      price: "$1,599",
-      discount: "29% OFF",
+      path: "/categories/gpu",
+      // discount: "29% OFF",
       image: "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=400"
     },
     {
       label: "SPECIAL OFFER",
       title: "Gaming Laptops",
-      price: "$1,299",
+      path: "/categories/leptop",
       image: "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?auto=format&fit=crop&w=400"
     }
   ];
+
+  // const router = useRouter();
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -57,8 +63,10 @@ const Hero = () => {
                     {slides[activeSlide].description}
                   </p>
                   <div className="flex items-center space-x-8 pt-4">
-                    <span className="text-3xl font-bold">{slides[activeSlide].price}</span>
-                    <button className="flex items-center space-x-2 bg-blue-400 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 group">
+                    {/* <span className="text-3xl font-bold">{slides[activeSlide].price}</span> */}
+                    <button className="flex items-center space-x-2 bg-blue-400 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 group"
+                    onClick={() => window.location.href = '/categories/computers'}
+                    >
                       <span>SHOP NOW</span>
                       <ArrowRight className="group-hover:translate-x-1 transition-transform duration-300" size={20} />
                     </button>
