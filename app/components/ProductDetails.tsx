@@ -1,113 +1,166 @@
 "use client";
+import React from "react";
+import {
+  MapPin,
+  Bed,
+  Bath,
+  Home,
+  Calendar,
+  Square as SquareFeet,
+  Building,
+  MapIcon,
+} from "lucide-react";
+import Image from "next/image";
+import { urlForImage } from "@/sanity/lib/image";
 
-import { urlForImage } from '@/sanity/lib/image';
-import Image from 'next/image';
-import React, { useContext, useEffect, useState } from 'react';
-import { CartContext } from '../context/CartContext';
-import { Minus, Plus, ShoppingCart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { FaWhatsapp } from 'react-icons/fa6';
+interface Product {
+  name: string;
+  slug: { current: string };
+  images: { asset: { url: string } }[];
+  description: string;
+  price: number;
+  area: number;
+  bedrooms: number;
+  bathrooms: number;
+  floors: number;
+  possession: string;
+  location: string;
+  address: string;
+  mapEmbeded: string;
+  category: string[];
+}
 
-const ProductDetails = ({ product }: any) => {
-  const [loading, setLoading] = useState(true);
-  const [index, setIndex] = useState(0);
-  const { cartItems, addProduct, qty, decQty, incQty }: any = useContext(CartContext);
+interface ProductDetailsProps {
+  product: Product;
+}
 
-  // Simulating loading effect for product data
-  useEffect(() => {
-    if (product) {
-      setTimeout(() => setLoading(false), 1000); // Simulate a short delay
+const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
+  const [activeImage, setActiveImage] = React.useState(0);
+
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(2)} Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(2)} Lac`;
     }
-  }, [product]);
-
-  if (loading) return <p className="flex text-3xl justify-center items-center min-h-screen">Loading...</p>;
+    return `₹${price.toLocaleString()}`;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <Card className="overflow-hidden bg-white rounded-lg shadow">
-          <div className="grid md:grid-cols-2 gap-8 p-8">
-            {/* Left - Image Section */}
-            <div className="space-y-6">
-              <div className="aspect-square relative rounded-lg overflow-hidden bg-gray-100">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Image Gallery */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="space-y-4">
+          {/* Main Image Display */}
+          <div className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg shadow-lg">
+            <Image
+              src={urlForImage(product.images[activeImage])?.url() || "/placeholder.jpg"} // Fallback image
+              alt={`Product view ${activeImage + 1}`}
+              width={800}
+              height={450}
+              className="object-cover w-full h-full"
+              unoptimized // Ensures external images load
+            />
+          </div>
+
+          {/* Thumbnail Images */}
+          <div className="grid grid-cols-4 gap-4 md:grid-cols-6 p-2  overflow-x-auto">
+            {product.images.map((item, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveImage(i)}
+                className={`relative w-20 h-20 rounded-lg overflow-hidden ${
+                  activeImage === i ? "ring-2 ring-black" : "ring-1 ring-gray-200"
+                }`}
+              >
                 <Image
-                  loader={() => urlForImage(product.images[index]).url()}
-                  src={urlForImage(product.images[index]).url()}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
+                  src={urlForImage(item)?.url() || "/placeholder.jpg"}
+                  alt={`Thumbnail ${i + 1}`}
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
+                  unoptimized
                 />
-              </div>
+              </button>
+            ))}
+          </div>
+        </div>
 
-              <div className="grid grid-cols-4 gap-4">
-                {product.images?.map((item: any, i: number) => (
-                  <button
-                    key={i}
-                    onClick={() => setIndex(i)}
-                    className={`relative aspect-square rounded-lg overflow-hidden ${
-                      index === i ? 'ring-2 ring-black' : 'ring-1 ring-gray-200'
-                    }`}
-                  >
-                    <Image
-                      loader={() => urlForImage(item).url()}
-                      src={urlForImage(item).url()}
-                      alt={`Product view ${i + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+        {/* Property Details */}
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+            <div className="flex items-center mt-2 text-gray-600">
+              <MapPin className="w-5 h-5 mr-2" />
+              <p>
+                {product.location} - {product.address}
+              </p>
             </div>
-
-            {/* Right - Product Info */}
-            <div className="space-y-6">
-              <div>
-                <Badge variant="secondary" className="mb-2">
-                  In Stock
-                </Badge>
-                <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-                  {product.name}
-                </h1>
-                <p className="mt-4 text-3xl font-bold text-gray-900">₹{product.price}</p>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-6">
-                {/* <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-900">Quantity</label>
-                  <div className="flex items-center space-x-4">
-                    <Button variant="outline" size="icon" onClick={decQty} className="h-10 w-10">
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="text-lg font-medium">{qty}</span>
-                    <Button variant="outline" size="icon" onClick={incQty} className="h-10 w-10">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div> */}
-
-                <Button className="w-full h-12 text-lg" onClick={() => window.open("https://wa.me/919987862640", "_blank")}>
-                  <FaWhatsapp className="mr-2 h-5 w-5" />
-                  Message
-                </Button>
-              </div>
-
-              {product.description && (
-                <div className="space-y-2">
-                  <h2 className="text-lg font-medium text-gray-900">Description</h2>
-                  <p className="text-gray-600">{product.description}</p>
-                </div>
-              )}
+            <div className="flex flex-wrap gap-2 mt-3">
+              {product.category.map((cat, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                >
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </span>
+              ))}
             </div>
           </div>
-        </Card>
+
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="text-3xl font-bold text-blue-600 flex items-center">
+              {formatPrice(product.price)}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
+              <div className="flex items-center space-x-2">
+                <Bed className="w-5 h-5 text-gray-600" />
+                <span>{product.bedrooms} Beds</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Bath className="w-5 h-5 text-gray-600" />
+                <span>{product.bathrooms} Baths</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <SquareFeet className="w-5 h-5 text-gray-600" />
+                <span>{product.area} sq.ft</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Building className="w-5 h-5 text-gray-600" />
+                <span>{product.floors} Floors</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MapIcon className="w-5 h-5 text-gray-600" />
+                <span>{product.location}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-5 h-5 text-gray-600" />
+                <span>{product.possession}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="prose max-w-none">
+            <h2 className="text-xl font-semibold mb-3">Description</h2>
+            <p className="text-gray-600 whitespace-pre-line">
+              {product.description}
+            </p>
+          </div>
+        </div>
       </div>
+
+      {/* Map Section */}
+      <div className="mt-12">
+  <h2 className="text-2xl font-semibold mb-6">Location</h2>
+  <div className="relative w-full h-[450px] rounded-lg overflow-hidden shadow-lg">
+    <div
+      dangerouslySetInnerHTML={{ __html: product.mapEmbeded }}
+      className="absolute inset-0 w-full h-full"
+    />
+  </div>
+</div>
+
     </div>
   );
 };
